@@ -7,12 +7,11 @@
 // Media Patent License 1.0 was not distributed with this source code in the
 // PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 
-mod x86;
 
 cfg_if::cfg_if! {
   if #[cfg(nasm_x86_64)] {
+    mod x86;
     use self::x86::*;
-    // use crate::asm::x86::sad_plane::*;
   } else {
     use self::rust::*;
   }
