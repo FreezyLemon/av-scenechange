@@ -13,7 +13,7 @@ use arg_enum_proc_macro::ArgEnum;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, ArgEnum)]
 pub enum CpuFeatureLevel {
-    RUST,
+    Rust,
     SSE2,
     SSSE3,
     #[arg_enum(alias = "sse4.1")]
@@ -71,7 +71,7 @@ impl Default for CpuFeatureLevel {
         } else if is_x86_feature_detected!("sse2") {
             CpuFeatureLevel::SSE2
         } else {
-            CpuFeatureLevel::RUST
+            CpuFeatureLevel::Rust
         };
         let manual: CpuFeatureLevel = match env::var("RAV1E_CPU_TARGET") {
             Ok(feature) => CpuFeatureLevel::from_str(&feature).unwrap_or(detected),

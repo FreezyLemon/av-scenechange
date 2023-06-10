@@ -123,5 +123,6 @@ pub(super) fn detect_scale_factor<T: Pixel>(
         );
     }
 
+    #[allow(clippy::let_and_return)]
     scale_func
 }

@@ -7,8 +7,6 @@
 // Media Patent License 1.0 was not distributed with this source code in the
 // PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 
-use std::mem;
-
 use v_frame::{
     pixel::{Pixel, PixelType},
     plane::Plane,
@@ -45,27 +43,24 @@ pub(crate) fn sad_plane_internal<T: Pixel>(
         PixelType::U8 => {
             // helper macro to reduce boilerplate
             macro_rules! call_asm {
-        ($func:ident, $src:expr, $dst:expr, $cpu:expr) => {
-          // SAFETY: Calls Assembly code.
-          //
-          // FIXME: Remove `allow` once https://github.com/rust-lang/rust-clippy/issues/8264 fixed
-          #[allow(clippy::undocumented_unsafe_blocks)]
-          unsafe {
-            let result = $func(
-              mem::transmute(src.data_origin().as_ptr()),
-              mem::transmute(dst.data_origin().as_ptr()),
-              src.cfg.stride,
-              src.cfg.width,
-              src.cfg.height,
-            );
+                ($func:ident, $src:expr, $dst:expr, $cpu:expr) => {
+                    // SAFETY: Calls Assembly code.
+                    unsafe {
+                        let result = $func(
+                            src.data_origin().as_ptr().cast::<u8>(),
+                            dst.data_origin().as_ptr().cast::<u8>(),
+                            src.cfg.stride,
+                            src.cfg.width,
+                            src.cfg.height,
+                        );
 
-            #[cfg(feature = "check_asm")]
-            assert_eq!(result, rust::sad_plane_internal($src, $dst, $cpu));
+                        #[cfg(feature = "check_asm")]
+                        assert_eq!(result, rust::sad_plane_internal($src, $dst, $cpu));
 
-            result
-          }
-        };
-      }
+                        result
+                    }
+                };
+            }
 
             if cpu >= CpuFeatureLevel::AVX2 {
                 call_asm!(rav1e_sad_plane_8bpc_avx2, src, dst, cpu)

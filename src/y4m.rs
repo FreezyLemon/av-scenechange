@@ -40,9 +40,7 @@ const fn map_y4m_color_space(color_space: y4m::Colorspace) -> ChromaSampling {
     use ChromaSampling::{Cs400, Cs420, Cs422, Cs444};
     match color_space {
         Cmono | Cmono12 => Cs400,
-        C420jpeg | C420paldv => Cs420,
-        C420mpeg2 => Cs420,
-        C420 | C420p10 | C420p12 => Cs420,
+        C420mpeg2 | C420jpeg | C420paldv | C420 | C420p10 | C420p12 => Cs420,
         C422 | C422p10 | C422p12 => Cs422,
         C444 | C444p10 | C444p12 => Cs444,
         _ => unimplemented!(),

@@ -112,7 +112,7 @@ impl<T: Pixel> SceneChangeDetector<T> {
         let score_deque = Vec::with_capacity(5 + lookahead_distance);
 
         // Downscaling factor for fast scenedetect (is currently always a power of 2)
-        let factor = scale_func.as_ref().map(|x| x.factor).unwrap_or(1);
+        let factor = scale_func.as_ref().map_or(1, |x| x.factor);
 
         // SAFETY: factor should always be a power of 2 and not 0 because of
         // the output of detect_scale_factor.
@@ -190,7 +190,7 @@ impl<T: Pixel> SceneChangeDetector<T> {
         }
 
         // Adaptive scenecut check
-        let (scenecut, score) = self.adaptive_scenecut();
+        let scenecut = self.adaptive_scenecut();
         let scenecut = self.handle_min_max_intervals(distance).unwrap_or(scenecut);
         #[cfg(feature = "devel")]
         debug!(
@@ -242,7 +242,7 @@ impl<T: Pixel> SceneChangeDetector<T> {
     /// scores Value of current frame is offset by lookahead, if lookahead
     /// >=5 Returns true if current scene score is higher than adapted
     /// threshold
-    fn adaptive_scenecut(&mut self) -> (bool, ScenecutResult) {
+    fn adaptive_scenecut(&mut self) -> bool {
         let score = self.score_deque[self.deque_offset];
 
         // We use the importance block algorithm's cost metrics as a secondary algorithm
@@ -259,7 +259,7 @@ impl<T: Pixel> SceneChangeDetector<T> {
             .iter()
             .any(|result| result.imp_block_cost >= imp_block_threshold)
         {
-            return (false, score);
+            return false;
         }
 
         let cost = score.forward_adjusted_cost;
@@ -282,7 +282,7 @@ impl<T: Pixel> SceneChangeDetector<T> {
             // so we want more "evidence" of there being a flash before creating a keyframe.
             let back_count_req = 2;
             if forward_over_tr_count == 0 && back_over_tr_count >= back_count_req {
-                return (true, score);
+                return true;
             }
 
             // Check for scenecut before flash
@@ -291,15 +291,15 @@ impl<T: Pixel> SceneChangeDetector<T> {
                 && forward_over_tr_count == 1
                 && forward_deque[0].forward_adjusted_cost >= forward_deque[0].threshold
             {
-                return (true, score);
+                return true;
             }
 
             if back_over_tr_count != 0 || forward_over_tr_count != 0 {
-                return (false, score);
+                return false;
             }
         }
 
-        (cost >= score.threshold, score)
+        cost >= score.threshold
     }
 }
 
