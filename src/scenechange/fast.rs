@@ -1,6 +1,5 @@
 use std::{cmp, sync::Arc};
 
-use debug_unreachable::debug_unreachable;
 use v_frame::{frame::Frame, pixel::Pixel, plane::Plane};
 
 use super::{ScaleFunction, SceneChangeDetector, ScenecutResult};
@@ -52,9 +51,7 @@ impl<T: Pixel> SceneChangeDetector<T> {
                     backward_adjusted_cost: delta,
                 }
             } else {
-                // SAFETY: `downscaled_frame_buffer` is always initialized to `Some(..)` with a
-                // valid state before this if/else block is reached.
-                unsafe { debug_unreachable!() }
+                unreachable!()
             }
         } else {
             if let Some(frame_buffer) = &mut self.frame_ref_buffer {
@@ -75,9 +72,7 @@ impl<T: Pixel> SceneChangeDetector<T> {
                     forward_adjusted_cost: delta,
                 }
             } else {
-                // SAFETY: `frame_ref_buffer` is always initialized to `Some(..)` at the start
-                // of this code block if it was `None`.
-                unsafe { debug_unreachable!() }
+                unreachable!()
             }
         }
     }
