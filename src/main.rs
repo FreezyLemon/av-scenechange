@@ -141,7 +141,7 @@ fn main() -> Result<()> {
     } else {
         detect_scene_changes::<_, u16>(&mut dec, opts, None, None)
     };
-    println!("{}", serde_json::to_string(&results)?);
+    print!("{}", serde_json::to_string(&results)?);
 
     if let Some(output_file) = matches.output {
         let mut file = File::create(output_file)?;
