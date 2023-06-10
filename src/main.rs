@@ -96,36 +96,34 @@ use std::{
 
 use anyhow::Result;
 use av_scenechange::{detect_scene_changes, DetectionOptions};
-use clap::Parser;
 
-#[derive(Parser, Debug)]
+use bpaf::Bpaf;
+
+#[derive(Clone, Debug, Bpaf)]
+#[bpaf(options)]
 struct Args {
     /// Sets the input file to use
-    #[clap(value_parser)]
     pub input: String,
 
     /// Optional file to write results to
-    #[clap(long, short, value_parser)]
+    #[bpaf(long, short)]
     pub output: Option<String>,
 
     /// Do not detect short scene flashes and exclude them as scene cuts
-    #[clap(long)]
     pub no_flash_detection: bool,
 
     /// Sets a minimum interval between two consecutive scenecuts
-    #[clap(long, value_parser)]
     pub min_scenecut: Option<usize>,
 
     /// Sets a maximum interval between two consecutive scenecuts,
     /// after which a scenecut will be forced
-    #[clap(long, value_parser)]
     pub max_scenecut: Option<usize>,
 }
 
 fn main() -> Result<()> {
     init_logger();
 
-    let matches = Args::parse();
+    let matches = args().run();
     let input = match matches.input.as_str() {
         "-" => Box::new(io::stdin()) as Box<dyn Read>,
         f => Box::new(File::open(f)?) as Box<dyn Read>,
