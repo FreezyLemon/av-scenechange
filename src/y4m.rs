@@ -1,42 +1,38 @@
 use std::io::Read;
 
-use rav1e::prelude::{ChromaSamplePosition, ChromaSampling, Frame, Pixel, Rational};
+use v_frame::{frame::Frame, pixel::Pixel, pixel::ChromaSampling};
+
 
 pub fn get_video_details<R: Read>(dec: &y4m::Decoder<R>) -> VideoDetails {
     let width = dec.get_width();
     let height = dec.get_height();
     let color_space = dec.get_colorspace();
     let bit_depth = color_space.get_bit_depth();
-    let (chroma_sampling, chroma_sample_position) = map_y4m_color_space(color_space);
-    let framerate = dec.get_framerate();
-    let time_base = Rational::new(framerate.den as u64, framerate.num as u64);
+    let chroma_sampling = map_y4m_color_space(color_space);
 
     VideoDetails {
         width,
         height,
         bit_depth,
         chroma_sampling,
-        chroma_sample_position,
-        time_base,
     }
 }
 
 const fn map_y4m_color_space(
     color_space: y4m::Colorspace,
-) -> (ChromaSampling, ChromaSamplePosition) {
+) -> ChromaSampling {
     use y4m::Colorspace::{
         C420jpeg, C420mpeg2, C420p10, C420p12, C420paldv, C422p10, C422p12, C444p10, C444p12,
         Cmono, Cmono12, C420, C422, C444,
     };
-    use ChromaSamplePosition::{Colocated, Unknown, Vertical};
     use ChromaSampling::{Cs400, Cs420, Cs422, Cs444};
     match color_space {
-        Cmono | Cmono12 => (Cs400, Unknown),
-        C420jpeg | C420paldv => (Cs420, Unknown),
-        C420mpeg2 => (Cs420, Vertical),
-        C420 | C420p10 | C420p12 => (Cs420, Colocated),
-        C422 | C422p10 | C422p12 => (Cs422, Colocated),
-        C444 | C444p10 | C444p12 => (Cs444, Colocated),
+        Cmono | Cmono12 => Cs400,
+        C420jpeg | C420paldv => Cs420,
+        C420mpeg2 => Cs420,
+        C420 | C420p10 | C420p12 => Cs420,
+        C422 | C422p10 | C422p12 => Cs422,
+        C444 | C444p10 | C444p12 => Cs444,
         _ => unimplemented!(),
     }
 }
@@ -75,19 +71,4 @@ pub struct VideoDetails {
     pub height: usize,
     pub bit_depth: usize,
     pub chroma_sampling: ChromaSampling,
-    pub chroma_sample_position: ChromaSamplePosition,
-    pub time_base: Rational,
-}
-
-impl Default for VideoDetails {
-    fn default() -> Self {
-        VideoDetails {
-            width: 640,
-            height: 480,
-            bit_depth: 8,
-            chroma_sampling: ChromaSampling::Cs420,
-            chroma_sample_position: ChromaSamplePosition::Unknown,
-            time_base: Rational { num: 30, den: 1 },
-        }
-    }
 }

@@ -89,6 +89,9 @@
 #![warn(clippy::missing_errors_doc)]
 #![warn(clippy::missing_panics_doc)]
 
+mod cpu_features;
+mod sad_plane;
+mod scenechange;
 mod y4m;
 
 use std::{
@@ -98,12 +101,14 @@ use std::{
     time::Instant,
 };
 
+use crate::scenechange::SceneChangeDetector;
 use ::y4m::Decoder;
-pub use rav1e::scenechange::SceneChangeDetector;
-use rav1e::{
-    config::{CpuFeatureLevel, EncoderConfig},
-    prelude::{Pixel, Sequence},
-};
+use v_frame::pixel::Pixel;
+use crate::cpu_features::CpuFeatureLevel;
+// use rav1e::{
+//     config::{CpuFeatureLevel, EncoderConfig},
+//     prelude::{Pixel, Sequence},
+// };
 
 /// Options determining how to run scene change detection.
 #[derive(Debug, Clone, Copy)]
@@ -153,31 +158,24 @@ pub fn new_detector<R: Read, T: Pixel>(
     opts: DetectionOptions,
 ) -> SceneChangeDetector<T> {
     let video_details = y4m::get_video_details(dec);
-    let mut config = EncoderConfig::with_speed_preset(10);
 
-    config.min_key_frame_interval = opts.min_scenecut_distance.map_or(0, |val| val as u64);
-    config.max_key_frame_interval = opts
+    let min_kf_interval = opts.min_scenecut_distance.map_or(0, |val| val as u64);
+    let max_kf_interval = opts
         .max_scenecut_distance
         .map_or_else(|| u32::MAX.into(), |val| val as u64);
-    config.width = video_details.width;
-    config.height = video_details.height;
-    config.bit_depth = video_details.bit_depth;
-    config.time_base = video_details.time_base;
-    config.chroma_sampling = video_details.chroma_sampling;
-    config.chroma_sample_position = video_details.chroma_sample_position;
-    // force disable temporal RDO to disable intra cost caching
-    config.speed_settings.transform.tx_domain_distortion = true;
 
-    let sequence = Arc::new(Sequence::new(&config));
     SceneChangeDetector::new(
-        config,
+        video_details.bit_depth,
         CpuFeatureLevel::default(),
         if opts.detect_flashes {
             opts.lookahead_distance
         } else {
             1
         },
-        sequence,
+        video_details.width as u32,
+        video_details.height as u32,
+        min_kf_interval,
+        max_kf_interval,
     )
 }
 
