@@ -108,9 +108,6 @@ use rav1e::{
 /// Options determining how to run scene change detection.
 #[derive(Debug, Clone, Copy)]
 pub struct DetectionOptions {
-    /// The speed of detection algorithm to use.
-    /// Slower algorithms are more accurate/better for use in encoders.
-    pub analysis_speed: SceneDetectionSpeed,
     /// Enabling this will utilize heuristics to avoid scenecuts
     /// that are too close to each other.
     /// This is generally useful if you want scenecut detection
@@ -131,7 +128,6 @@ pub struct DetectionOptions {
 impl Default for DetectionOptions {
     fn default() -> Self {
         DetectionOptions {
-            analysis_speed: SceneDetectionSpeed::Standard,
             detect_flashes: true,
             lookahead_distance: 5,
             min_scenecut_distance: None,
@@ -157,12 +153,7 @@ pub fn new_detector<R: Read, T: Pixel>(
     opts: DetectionOptions,
 ) -> SceneChangeDetector<T> {
     let video_details = y4m::get_video_details(dec);
-    let mut config =
-        EncoderConfig::with_speed_preset(if opts.analysis_speed == SceneDetectionSpeed::Fast {
-            10
-        } else {
-            8
-        });
+    let mut config = EncoderConfig::with_speed_preset(10);
 
     config.min_key_frame_interval = opts.min_scenecut_distance.map_or(0, |val| val as u64);
     config.max_key_frame_interval = opts
@@ -280,12 +271,4 @@ pub fn detect_scene_changes<R: Read, T: Pixel>(
         frame_count: frameno,
         speed: frameno as f64 / start_time.elapsed().as_secs_f64(),
     }
-}
-
-#[derive(Clone, Copy, Debug, PartialOrd, PartialEq, Eq)]
-pub enum SceneDetectionSpeed {
-    /// Fastest scene detection using pixel-wise comparison
-    Fast,
-    /// Scene detection using motion vectors
-    Standard,
 }

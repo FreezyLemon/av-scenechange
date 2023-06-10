@@ -95,7 +95,7 @@ use std::{
 };
 
 use anyhow::Result;
-use av_scenechange::{detect_scene_changes, DetectionOptions, SceneDetectionSpeed};
+use av_scenechange::{detect_scene_changes, DetectionOptions};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -146,17 +146,11 @@ fn main() -> Result<()> {
     };
     let mut reader = BufReader::new(input);
 
-    let mut opts = DetectionOptions {
+    let opts = DetectionOptions {
         detect_flashes: !matches.no_flash_detection,
         min_scenecut_distance: matches.min_scenecut,
         max_scenecut_distance: matches.max_scenecut,
         ..DetectionOptions::default()
-    };
-
-    opts.analysis_speed = match matches.speed {
-        0 => SceneDetectionSpeed::Standard,
-        1 => SceneDetectionSpeed::Fast,
-        _ => panic!("Speed mode must be in range [0; 1]"),
     };
 
     let mut dec = y4m::Decoder::new(&mut reader)?;
