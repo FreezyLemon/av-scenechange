@@ -121,8 +121,6 @@ struct Args {
 }
 
 fn main() -> Result<()> {
-    init_logger();
-
     let matches = args().run();
     let input = match matches.input.as_str() {
         "-" => Box::new(io::stdin()) as Box<dyn Read>,
@@ -154,51 +152,4 @@ fn main() -> Result<()> {
     }
 
     Ok(())
-}
-
-#[cfg(not(feature = "devel"))]
-const fn init_logger() {
-    // Do nothing
-}
-
-#[cfg(feature = "devel")]
-fn init_logger() {
-    use std::str::FromStr;
-    fn level_colored(l: log::Level) -> console::StyledObject<&'static str> {
-        use console::style;
-        use log::Level;
-        match l {
-            Level::Trace => style("??").dim(),
-            Level::Debug => style("? ").dim(),
-            Level::Info => style("> ").green(),
-            Level::Warn => style("! ").yellow(),
-            Level::Error => style("!!").red(),
-        }
-    }
-
-    let level = std::env::var("RAV1E_LOG")
-        .ok()
-        .and_then(|l| log::LevelFilter::from_str(&l).ok())
-        .unwrap_or(log::LevelFilter::Info);
-
-    fern::Dispatch::new()
-        .format(move |out, message, record| {
-            out.finish(format_args!(
-                "{level} {message}",
-                level = level_colored(record.level()),
-                message = message,
-            ));
-        })
-        // set the default log level. to filter out verbose log messages from dependencies, set
-        // this to Warn and overwrite the log level for your crate.
-        .level(log::LevelFilter::Warn)
-        // change log levels for individual modules. Note: This looks for the record's target
-        // field which defaults to the module path but can be overwritten with the `target`
-        // parameter:
-        // `info!(target="special_target", "This log message is about special_target");`
-        .level_for("rav1e", level)
-        // output to stdout
-        .chain(std::io::stderr())
-        .apply()
-        .unwrap();
 }

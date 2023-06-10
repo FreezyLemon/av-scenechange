@@ -190,17 +190,6 @@ impl<T: Pixel> SceneChangeDetector<T> {
         // Adaptive scenecut check
         let scenecut = self.adaptive_scenecut();
         let scenecut = self.handle_min_max_intervals(distance).unwrap_or(scenecut);
-        #[cfg(feature = "devel")]
-        debug!(
-            "[SC-Detect] Frame {}: Raw={:5.1}  ImpBl={:5.1}  Bwd={:5.1}  Fwd={:5.1}  Th={:.1}  {}",
-            input_frameno,
-            score.inter_cost,
-            score.imp_block_cost,
-            score.backward_adjusted_cost,
-            score.forward_adjusted_cost,
-            score.threshold,
-            if scenecut { "Scenecut" } else { "No cut" }
-        );
 
         // Keep score deque of 5 backward frames
         // and forward frames of length of lookahead offset

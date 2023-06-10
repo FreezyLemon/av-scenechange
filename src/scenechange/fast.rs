@@ -96,30 +96,13 @@ pub(super) fn detect_scale_factor<T: Pixel>(
     max_width: u32,
     max_height: u32,
 ) -> Option<ScaleFunction<T>> {
-    let small_edge = cmp::min(max_height, max_width) as usize;
-    let scale_func = match small_edge {
+    let small_edge = cmp::min(max_height, max_width);
+    match small_edge {
         0..=240 => None,
         241..=480 => Some(ScaleFunction::from_scale::<2>()),
         481..=720 => Some(ScaleFunction::from_scale::<4>()),
         721..=1080 => Some(ScaleFunction::from_scale::<8>()),
         1081..=1600 => Some(ScaleFunction::from_scale::<16>()),
-        1601..=usize::MAX => Some(ScaleFunction::from_scale::<32>()),
-        _ => None,
-    };
-
-    #[cfg(feature = "devel")]
-    if let Some(scale_factor) = scale_func.as_ref().map(|x| x.factor) {
-        debug!(
-            "Scene detection scale factor {}, [{},{}] -> [{},{}]",
-            scale_factor,
-            sequence.max_frame_width,
-            sequence.max_frame_height,
-            // SAFETY: We ensure that scale_factor is set based on nonzero powers of 2.
-            unsafe { fast_idiv(sequence.max_frame_width as usize, scale_factor) },
-            unsafe { fast_idiv(sequence.max_frame_height as usize, scale_factor) }
-        );
+        1601..=u32::MAX => Some(ScaleFunction::from_scale::<32>()),
     }
-
-    #[allow(clippy::let_and_return)]
-    scale_func
 }
