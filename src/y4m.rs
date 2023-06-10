@@ -1,7 +1,9 @@
 use std::io::Read;
 
-use v_frame::{frame::Frame, pixel::Pixel, pixel::ChromaSampling};
-
+use v_frame::{
+    frame::Frame,
+    pixel::{ChromaSampling, Pixel},
+};
 
 pub fn get_video_details<R: Read>(dec: &y4m::Decoder<R>) -> VideoDetails {
     let width = dec.get_width();
@@ -18,12 +20,22 @@ pub fn get_video_details<R: Read>(dec: &y4m::Decoder<R>) -> VideoDetails {
     }
 }
 
-const fn map_y4m_color_space(
-    color_space: y4m::Colorspace,
-) -> ChromaSampling {
+const fn map_y4m_color_space(color_space: y4m::Colorspace) -> ChromaSampling {
     use y4m::Colorspace::{
-        C420jpeg, C420mpeg2, C420p10, C420p12, C420paldv, C422p10, C422p12, C444p10, C444p12,
-        Cmono, Cmono12, C420, C422, C444,
+        C420jpeg,
+        C420mpeg2,
+        C420p10,
+        C420p12,
+        C420paldv,
+        C422p10,
+        C422p12,
+        C444p10,
+        C444p12,
+        Cmono,
+        Cmono12,
+        C420,
+        C422,
+        C444,
     };
     use ChromaSampling::{Cs400, Cs420, Cs422, Cs444};
     match color_space {

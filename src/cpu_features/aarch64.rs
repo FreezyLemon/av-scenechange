@@ -7,40 +7,40 @@
 // Media Patent License 1.0 was not distributed with this source code in the
 // PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 
+use std::{env, str::FromStr};
+
 use arg_enum_proc_macro::ArgEnum;
-use std::env;
-use std::str::FromStr;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, ArgEnum)]
 pub enum CpuFeatureLevel {
-  RUST,
-  NEON,
+    RUST,
+    NEON,
 }
 
 impl CpuFeatureLevel {
-  pub const fn len() -> usize {
-    CpuFeatureLevel::NEON as usize + 1
-  }
+    pub const fn len() -> usize {
+        CpuFeatureLevel::NEON as usize + 1
+    }
 
-  #[inline(always)]
-  pub fn as_index(self) -> usize {
-    self as usize
-  }
+    #[inline(always)]
+    pub fn as_index(self) -> usize {
+        self as usize
+    }
 }
 
 impl Default for CpuFeatureLevel {
-  fn default() -> CpuFeatureLevel {
-    let detected = CpuFeatureLevel::NEON;
-    let manual: CpuFeatureLevel = match env::var("RAV1E_CPU_TARGET") {
-      Ok(feature) => CpuFeatureLevel::from_str(&feature).unwrap_or(detected),
-      Err(_e) => detected,
-    };
-    if manual > detected {
-      detected
-    } else {
-      manual
+    fn default() -> CpuFeatureLevel {
+        let detected = CpuFeatureLevel::NEON;
+        let manual: CpuFeatureLevel = match env::var("RAV1E_CPU_TARGET") {
+            Ok(feature) => CpuFeatureLevel::from_str(&feature).unwrap_or(detected),
+            Err(_e) => detected,
+        };
+        if manual > detected {
+            detected
+        } else {
+            manual
+        }
     }
-  }
 }
 
 // Create a static lookup table for CPUFeatureLevel enums

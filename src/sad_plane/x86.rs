@@ -7,13 +7,14 @@
 // Media Patent License 1.0 was not distributed with this source code in the
 // PATENTS file, you can obtain it at www.aomedia.org/license/patent.
 
-use crate::cpu_features::CpuFeatureLevel;
-use crate::sad_plane::*;
-use v_frame::pixel::{Pixel, PixelType};
-
-use v_frame::plane::Plane;
-
 use std::mem;
+
+use v_frame::{
+    pixel::{Pixel, PixelType},
+    plane::Plane,
+};
+
+use crate::{cpu_features::CpuFeatureLevel, sad_plane::*};
 
 macro_rules! decl_sad_plane_fn {
   ($($f:ident),+) => {
@@ -31,17 +32,19 @@ macro_rules! decl_sad_plane_fn {
 decl_sad_plane_fn!(rav1e_sad_plane_8bpc_sse2, rav1e_sad_plane_8bpc_avx2);
 
 pub(crate) fn sad_plane_internal<T: Pixel>(
-  src: &Plane<T>, dst: &Plane<T>, cpu: CpuFeatureLevel,
+    src: &Plane<T>,
+    dst: &Plane<T>,
+    cpu: CpuFeatureLevel,
 ) -> u64 {
-  debug_assert!(src.cfg.width == dst.cfg.width);
-  debug_assert!(src.cfg.stride == dst.cfg.stride);
-  debug_assert!(src.cfg.height == dst.cfg.height);
-  debug_assert!(src.cfg.width <= src.cfg.stride);
+    debug_assert!(src.cfg.width == dst.cfg.width);
+    debug_assert!(src.cfg.stride == dst.cfg.stride);
+    debug_assert!(src.cfg.height == dst.cfg.height);
+    debug_assert!(src.cfg.width <= src.cfg.stride);
 
-  match T::type_enum() {
-    PixelType::U8 => {
-      // helper macro to reduce boilerplate
-      macro_rules! call_asm {
+    match T::type_enum() {
+        PixelType::U8 => {
+            // helper macro to reduce boilerplate
+            macro_rules! call_asm {
         ($func:ident, $src:expr, $dst:expr, $cpu:expr) => {
           // SAFETY: Calls Assembly code.
           //
@@ -64,14 +67,14 @@ pub(crate) fn sad_plane_internal<T: Pixel>(
         };
       }
 
-      if cpu >= CpuFeatureLevel::AVX2 {
-        call_asm!(rav1e_sad_plane_8bpc_avx2, src, dst, cpu)
-      } else if cpu >= CpuFeatureLevel::SSE2 {
-        call_asm!(rav1e_sad_plane_8bpc_sse2, src, dst, cpu)
-      } else {
-        rust::sad_plane_internal(src, dst, cpu)
-      }
+            if cpu >= CpuFeatureLevel::AVX2 {
+                call_asm!(rav1e_sad_plane_8bpc_avx2, src, dst, cpu)
+            } else if cpu >= CpuFeatureLevel::SSE2 {
+                call_asm!(rav1e_sad_plane_8bpc_sse2, src, dst, cpu)
+            } else {
+                rust::sad_plane_internal(src, dst, cpu)
+            }
+        }
+        PixelType::U16 => rust::sad_plane_internal(src, dst, cpu),
     }
-    PixelType::U16 => rust::sad_plane_internal(src, dst, cpu),
-  }
 }

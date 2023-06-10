@@ -101,10 +101,10 @@ use std::{
     time::Instant,
 };
 
-use crate::scenechange::SceneChangeDetector;
 use ::y4m::Decoder;
 use v_frame::pixel::Pixel;
-use crate::cpu_features::CpuFeatureLevel;
+
+use crate::{cpu_features::CpuFeatureLevel, scenechange::SceneChangeDetector};
 // use rav1e::{
 //     config::{CpuFeatureLevel, EncoderConfig},
 //     prelude::{Pixel, Sequence},
