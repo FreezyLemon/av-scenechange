@@ -18,7 +18,6 @@ use std::{sync::Arc, u64};
 // use crate::me::RefMEStats;
 // use crate::util::Pixel;
 use debug_unreachable::debug_unreachable;
-use rust_hawktracer::*;
 use v_frame::{frame::Frame, pixel::Pixel, plane::Plane};
 
 use self::fast::{detect_scale_factor, FAST_THRESHOLD};
@@ -147,7 +146,6 @@ impl<T: Pixel> SceneChangeDetector<T> {
     /// to the second frame in `frame_set`.
     ///
     /// This will gracefully handle the first frame in the video as well.
-    #[hawktracer(analyze_next_frame)]
     pub fn analyze_next_frame(
         &mut self,
         frame_set: &[&Arc<Frame<T>>],

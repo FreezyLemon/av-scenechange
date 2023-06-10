@@ -108,10 +108,6 @@ struct Args {
     #[clap(long, short, value_parser)]
     pub output: Option<String>,
 
-    /// Speed level for scene-change detection, 0: best quality, 1: fastest mode
-    #[clap(long, short, value_parser, default_value_t = 0)]
-    pub speed: u8,
-
     /// Do not detect short scene flashes and exclude them as scene cuts
     #[clap(long)]
     pub no_flash_detection: bool,
@@ -127,17 +123,7 @@ struct Args {
 }
 
 fn main() -> Result<()> {
-    #[cfg(feature = "tracing")]
-    use rust_hawktracer::*;
     init_logger();
-
-    #[cfg(feature = "tracing")]
-    let instance = HawktracerInstance::new();
-    #[cfg(feature = "tracing")]
-    let _listener = instance.create_listener(HawktracerListenerType::ToFile {
-        file_path: "trace.bin".into(),
-        buffer_size: 4096,
-    });
 
     let matches = Args::parse();
     let input = match matches.input.as_str() {

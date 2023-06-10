@@ -16,7 +16,6 @@ serde_json = { version = "1.0.62", optional = true }
 log = { version = "0.4.14", optional = true }
 console = { version = "0.15", optional = true }
 fern = { version = "0.6", optional = true }
-rust_hawktracer = "0.7.0"
 debug_unreachable = "0.1.1"
 v_frame = "0.3.3"
 cfg-if = "1.0.0"
@@ -33,7 +32,6 @@ asm = ["nasm-rs", "cc"]
 binary = ["clap", "serialize"]
 serialize = ["serde", "serde_json"]
 devel = ["log", "console", "fern"]
-tracing = ["rust_hawktracer/profiling_enabled"]
 
 [[bin]]
 name = "av-scenechange"

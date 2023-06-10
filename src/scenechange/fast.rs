@@ -1,7 +1,6 @@
 use std::{cmp, sync::Arc};
 
 use debug_unreachable::debug_unreachable;
-use rust_hawktracer::*;
 use v_frame::{frame::Frame, pixel::Pixel, plane::Plane};
 
 use super::{ScaleFunction, SceneChangeDetector, ScenecutResult};
@@ -13,7 +12,6 @@ pub(super) const FAST_THRESHOLD: f64 = 18.0;
 impl<T: Pixel> SceneChangeDetector<T> {
     /// The fast algorithm detects fast cuts using a raw difference
     /// in pixel values between the scaled frames.
-    #[hawktracer(fast_scenecut)]
     pub(super) fn fast_scenecut(
         &mut self,
         frame1: Arc<Frame<T>>,
@@ -86,7 +84,6 @@ impl<T: Pixel> SceneChangeDetector<T> {
 
     /// Calculates the average sum of absolute difference (SAD) per pixel
     /// between 2 planes
-    #[hawktracer(delta_in_planes)]
     fn delta_in_planes(&self, plane1: &Plane<T>, plane2: &Plane<T>) -> f64 {
         let delta = sad_plane::sad_plane(plane1, plane2, self.cpu_feature_level);
 
