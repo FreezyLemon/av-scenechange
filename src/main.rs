@@ -96,7 +96,6 @@ use std::{
 
 use anyhow::Result;
 use av_scenechange::{detect_scene_changes, DetectionOptions};
-
 use bpaf::Bpaf;
 
 #[derive(Clone, Debug, Bpaf)]
