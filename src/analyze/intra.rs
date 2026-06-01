@@ -44,8 +44,8 @@ pub fn estimate_intra_costs<T: Pixel>(
     let bsize = BlockSize::from_width_and_height(IMPORTANCE_BLOCK_SIZE, IMPORTANCE_BLOCK_SIZE);
     let tx_size = bsize.tx_size();
 
-    let h_in_imp_b = plane.height().get() / IMPORTANCE_BLOCK_SIZE;
-    let w_in_imp_b = plane.width().get() / IMPORTANCE_BLOCK_SIZE;
+    let h_in_imp_b = plane.height() / IMPORTANCE_BLOCK_SIZE;
+    let w_in_imp_b = plane.width() / IMPORTANCE_BLOCK_SIZE;
     let mut intra_costs = Vec::with_capacity(h_in_imp_b * w_in_imp_b);
 
     for y in 0..h_in_imp_b {
@@ -139,11 +139,11 @@ pub fn get_intra_edges<'a, T: Pixel>(
         let rect_w = dst
             .rect()
             .width
-            .min(dst.plane_cfg.width.get() - dst.rect().x as usize);
+            .min(dst.plane_cfg.width() - dst.rect().x as usize);
         let rect_h = dst
             .rect()
             .height
-            .min(dst.plane_cfg.height.get() - dst.rect().y as usize);
+            .min(dst.plane_cfg.height() - dst.rect().y as usize);
 
         // Needs left
         if needs_left {
@@ -241,7 +241,7 @@ pub fn predict_dc_intra<T: Pixel>(
         if #[cfg(asm_x86_64)] {
             // There is currently a crash in the HBD ASM when the `dst` width is not mod 8.
             // Fallback to Rust code for that case.
-            if size_of::<T>() != 2 || dst.plane_cfg.width.get().is_multiple_of(8) {
+            if size_of::<T>() != 2 || dst.plane_cfg.width().is_multiple_of(8) {
                 if crate::cpu::has_avx512icl() {
                     // SAFETY: call to SIMD function
                     unsafe { avx512icl::predict_dc_intra_internal(variant, dst, tx_size, bit_depth, edge_buf); }

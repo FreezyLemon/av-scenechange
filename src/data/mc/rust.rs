@@ -140,7 +140,7 @@ pub fn put_8tap_internal<T: Pixel>(
     assert_eq!(height & 1, 0);
     assert!(width.is_power_of_two() && (2..=128).contains(&width));
 
-    let ref_stride = src.plane.geometry().stride.get();
+    let ref_stride = src.plane.geometry().stride();
     let y_filter = get_filter(row_frac, height);
     let x_filter = get_filter(col_frac, width);
     let max_sample_val = (1 << bit_depth) - 1;

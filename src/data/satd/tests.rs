@@ -1,5 +1,3 @@
-use std::num::{NonZeroU8, NonZeroUsize};
-
 use cfg_if::cfg_if;
 use v_frame::{chroma::ChromaSubsampling, frame::FrameBuilder, pixel::Pixel, plane::Plane};
 
@@ -7,29 +5,17 @@ use crate::data::plane::{Area, AsRegion, PlaneRegion};
 
 /// Helper function to create a test plane with padding
 fn create_padded_plane<T: Pixel>(width: usize, height: usize, padding: usize) -> Plane<T> {
-    let width_nz = NonZeroUsize::new(width).expect("width must be non-zero");
-    let height_nz = NonZeroUsize::new(height).expect("height must be non-zero");
-
     // Determine bit depth based on pixel type
-    let bit_depth = if std::mem::size_of::<T>() == 1 {
-        NonZeroU8::new(8).expect("8 is non-zero")
-    } else {
-        NonZeroU8::new(10).expect("10 is non-zero")
-    };
+    let bit_depth = if size_of::<T>() == 1 { 8 } else { 10 };
 
     // Create a monochrome frame with padding and extract the y_plane
-    let frame = FrameBuilder::new(
-        width_nz,
-        height_nz,
-        ChromaSubsampling::Monochrome,
-        bit_depth,
-    )
-    .luma_padding_left(padding)
-    .luma_padding_right(padding)
-    .luma_padding_top(padding)
-    .luma_padding_bottom(padding)
-    .build::<T>()
-    .expect("Failed to build frame");
+    let frame = FrameBuilder::new(width, height, ChromaSubsampling::Monochrome, bit_depth)
+        .luma_padding_left(padding)
+        .luma_padding_right(padding)
+        .luma_padding_top(padding)
+        .luma_padding_bottom(padding)
+        .build::<T>()
+        .expect("Failed to build frame");
 
     frame.y_plane
 }
@@ -49,7 +35,7 @@ fn setup_planes<T: Pixel>() -> (Plane<T>, Plane<T>) {
 
     for (i, row) in input_plane
         .data_mut()
-        .chunks_mut(input_geom.stride.get())
+        .chunks_mut(input_geom.stride())
         .enumerate()
     {
         for (j, pixel) in row.iter_mut().enumerate() {
@@ -61,7 +47,7 @@ fn setup_planes<T: Pixel>() -> (Plane<T>, Plane<T>) {
 
     for (i, row) in rec_plane
         .data_mut()
-        .chunks_mut(rec_geom.stride.get())
+        .chunks_mut(rec_geom.stride())
         .enumerate()
     {
         for (j, pixel) in row.iter_mut().enumerate() {
