@@ -21,15 +21,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aligned-vec"
-version = "0.6.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc890384c8602f339876ded803c97ad529f3842aba97f6392b3dba0dd171769b"
-dependencies = [
- "equator",
-]
-
-[[package]]
 name = "alloca"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -132,9 +123,8 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "av-decoders"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a31ed07c3a0db5375deded31ba4db91bdf43660781680eae78392d3dafd77d9d"
+version = "0.11.0"
+source = "git+https://github.com/FreezyLemon/av-decoders?branch=v_frame-0.7#fe8395d2f8b44b4deb4631a9aa22cb2ca2a6fcc7"
 dependencies = [
  "ffmpeg-the-third",
  "ffms2-sys",
@@ -458,26 +448,6 @@ name = "encode_unicode"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34aa73646ffb006b8f5147f3dc182bd4bcb190227ce861fc4a4844bf8e3cb2c0"
-
-[[package]]
-name = "equator"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4711b213838dfee0117e3be6ac926007d7f433d7bbe33595975d4190cb07e6fc"
-dependencies = [
- "equator-macro",
-]
-
-[[package]]
-name = "equator-macro"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44f23cf4b44bfce11a86ace86f8a73ffdec849c9fd00a386a53d278bd9e81fb3"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
 
 [[package]]
 name = "error-chain"
@@ -1253,15 +1223,8 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "v_frame"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "327127c37e0b0d9d93dc053beb60ce876174aaa469d282d46d3212c634958add"
-dependencies = [
- "aligned-vec",
- "num-traits",
- "thiserror",
- "wasm-bindgen",
-]
+version = "0.6.0"
+source = "git+https://github.com/FreezyLemon/v_frame?branch=pixel-new-trait-bounds#f961865cbcc91a639eec307dbf6c669ef38dc758"
 
 [[package]]
 name = "valuable"
