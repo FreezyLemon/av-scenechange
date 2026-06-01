@@ -62,8 +62,8 @@ pub(super) fn get_satd_internal<T: Pixel>(
                 .zip(chunk_org.rows_iter().zip(chunk_ref.rows_iter()))
             {
                 for (diff, (a, b)) in row_diff.iter_mut().zip(row_org.iter().zip(row_ref.iter())) {
-                    let a = a.to_i32().expect("value should fit in i32");
-                    let b = b.to_i32().expect("value should fit in i32");
+                    let a = i32::from((*a).into());
+                    let b = i32::from((*b).into());
                     *diff = a - b;
                 }
             }

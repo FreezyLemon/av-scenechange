@@ -725,8 +725,8 @@ pub(crate) fn downscale_in_place<T: Pixel, const SCALE: usize>(
             // Iter dst cols
             for (col_idx, dst) in dst_row.get_unchecked_mut(..width).iter_mut().enumerate() {
                 macro_rules! generate_inner_loop {
-                    ($x:ty, $to_x:ident) => {
-                        let mut sum = half_box_pixels as $x;
+                    ($sum_ty:ty) => {
+                        let mut sum = half_box_pixels as $sum_ty;
                         // Sum box of size scale * scale
 
                         // Iter src row
@@ -737,16 +737,15 @@ pub(crate) fn downscale_in_place<T: Pixel, const SCALE: usize>(
                             // Iter src col
                             for x in 0..SCALE {
                                 let src_col_idx = col_idx * SCALE + x;
-                                sum += src_row
-                                    .get_unchecked(src_col_idx)
-                                    .$to_x()
-                                    .expect("value should fit into integer");
+                                let src_val = *src_row.get_unchecked(src_col_idx);
+                                sum += <$sum_ty>::from(src_val.into());
                             }
                         }
 
                         // Box average
                         let avg = sum as usize / box_pixels;
-                        *dst = T::from(avg).expect("value should fit into Pixel");
+                        let avg = u16::try_from(avg).expect("value should fit into u16");
+                        *dst = T::try_from(avg).expect("value should fit into Pixel");
                     };
                 }
 
@@ -755,9 +754,9 @@ pub(crate) fn downscale_in_place<T: Pixel, const SCALE: usize>(
                     && SCALE as u128 * SCALE as u128 * (u8::MAX as u128) + half_box_pixels as u128
                         <= u16::MAX as u128
                 {
-                    generate_inner_loop!(u16, to_u16);
+                    generate_inner_loop!(u16);
                 } else {
-                    generate_inner_loop!(u32, to_u32);
+                    generate_inner_loop!(u32);
                 }
             }
         }

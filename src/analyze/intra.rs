@@ -168,7 +168,7 @@ pub fn get_intra_edges<'a, T: Pixel>(
                 let val = if y != 0 {
                     *get_unchecked_rel(&dst[y - 1], 0)
                 } else {
-                    T::from(base + 1).expect("value should fit in Pixel")
+                    T::try_from(base + 1).expect("value should fit in Pixel")
                 };
                 for v in
                     get_unchecked_mut_rel(left, 2 * MAX_TX_SIZE - tx_size.height()..).iter_mut()
@@ -204,7 +204,7 @@ pub fn get_intra_edges<'a, T: Pixel>(
                 let val = if x != 0 {
                     *get_unchecked_rel(&dst[0], x - 1)
                 } else {
-                    T::from(base - 1).expect("value should fit in Pixel")
+                    T::try_from(base - 1).expect("value should fit in Pixel")
                 };
                 for v in get_unchecked_mut_rel(above, ..tx_size.width()) {
                     v.write(val);
@@ -213,7 +213,8 @@ pub fn get_intra_edges<'a, T: Pixel>(
             init_above += tx_size.width();
         }
 
-        get_unchecked_mut_rel(top_left, 0).write(T::from(base).expect("value should fit in Pixel"));
+        get_unchecked_mut_rel(top_left, 0)
+            .write(T::try_from(base).expect("value should fit in Pixel"));
     }
     IntraEdge::new(edge_buf, init_left, init_above)
 }

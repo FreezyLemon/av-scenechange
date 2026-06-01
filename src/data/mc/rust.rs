@@ -1,4 +1,3 @@
-use num_traits::ToPrimitive;
 use v_frame::pixel::Pixel;
 
 use crate::{
@@ -159,14 +158,13 @@ pub fn put_8tap_internal<T: Pixel>(
                 let src_slice = &offset_slice[r];
                 let dst_slice = &mut dst[r];
                 for c in 0..width {
-                    dst_slice[c] = T::from(
+                    dst_slice[c] = T::try_from(
                         round_shift(
-                            // SAFETY: We pass this a raw pointer, but it's created from a
-                            // checked slice, so we are safe.
-                            unsafe { run_filter(src_slice[c..].as_ptr(), ref_stride, y_filter) },
+                            // SAFETY: Created from a checked slice.
+                            unsafe { run_filter(&src_slice[c..], ref_stride, y_filter) },
                             7,
                         )
-                        .clamp(0, max_sample_val),
+                        .clamp(0, max_sample_val) as u16,
                     )
                     .expect("value should fit in Pixel");
                 }
@@ -178,17 +176,16 @@ pub fn put_8tap_internal<T: Pixel>(
                 let src_slice = &offset_slice[r];
                 let dst_slice = &mut dst[r];
                 for c in 0..width {
-                    dst_slice[c] = T::from(
+                    dst_slice[c] = T::try_from(
                         round_shift(
                             round_shift(
-                                // SAFETY: We pass this a raw pointer, but it's created from a
-                                // checked slice, so we are safe.
-                                unsafe { run_filter(src_slice[c..].as_ptr(), 1, x_filter) },
+                                // SAFETY: Created from a checked slice.
+                                unsafe { run_filter(&src_slice[c..], 1, x_filter) },
                                 7 - intermediate_bits,
                             ),
                             intermediate_bits,
                         )
-                        .clamp(0, max_sample_val),
+                        .clamp(0, max_sample_val) as u16,
                     )
                     .expect("value should fit in Pixel");
                 }
@@ -203,9 +200,8 @@ pub fn put_8tap_internal<T: Pixel>(
                     let src_slice = &offset_slice[r];
                     for c in cg..(cg + 8).min(width) {
                         intermediate[8 * r + (c - cg)] = round_shift(
-                            // SAFETY: We pass this a raw pointer, but it's created from a
-                            // checked slice, so we are safe.
-                            unsafe { run_filter(src_slice[c..].as_ptr(), 1, x_filter) },
+                            // SAFETY: Created from a checked slice.
+                            unsafe { run_filter(&src_slice[c..], 1, x_filter) },
                             7 - intermediate_bits,
                         ) as i16;
                     }
@@ -214,16 +210,13 @@ pub fn put_8tap_internal<T: Pixel>(
                 for r in 0..height {
                     let dst_slice = &mut dst[r];
                     for c in cg..(cg + 8).min(width) {
-                        dst_slice[c] = T::from(
+                        dst_slice[c] = T::try_from(
                             round_shift(
-                                // SAFETY: We pass this a raw pointer, but it's created from a
-                                // checked slice, so we are safe.
-                                unsafe {
-                                    run_filter(intermediate[8 * r + c - cg..].as_ptr(), 8, y_filter)
-                                },
+                                // SAFETY: Created from a checked slice.
+                                unsafe { run_filter(&intermediate[8 * r + c - cg..], 8, y_filter) },
                                 7 + intermediate_bits,
                             )
-                            .clamp(0, max_sample_val),
+                            .clamp(0, max_sample_val) as u16,
                         )
                         .expect("value should fit in Pixel");
                     }
@@ -245,15 +238,18 @@ fn get_filter(frac: i32, length: usize) -> [i32; SUBPEL_FILTER_SIZE] {
 }
 
 /// SAFETY: caller must validate that `stride * filter.len() <= src.len()`
-unsafe fn run_filter<T: ToPrimitive>(src: *const T, stride: usize, filter: [i32; 8]) -> i32 {
+unsafe fn run_filter<T: Copy + TryInto<u16>>(src: &[T], stride: usize, filter: [i32; 8]) -> i32
+where
+    <T as TryInto<u16>>::Error: std::error::Error,
+{
     filter
         .iter()
         .enumerate()
         .map(|(i, f)| {
             // SAFETY: caller must validate that `stride * filter.len() <= src.len()`
             unsafe {
-                let p = src.add(i * stride);
-                f * (*p).to_i32().expect("value should fit in i32")
+                let p = *src.get_unchecked(i * stride);
+                f * i32::from(p.try_into().expect("fits into u16"))
             }
         })
         .sum::<i32>()

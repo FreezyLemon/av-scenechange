@@ -37,12 +37,9 @@ fn pred_dc<T: Pixel>(
 ) {
     let edges = left[..height].iter().chain(above[..width].iter());
     let len = (width + height) as u32;
-    let avg = (edges.fold(0u32, |acc, &v| {
-        let v: u32 = v.to_u32().expect("value should fit in u32");
-        v + acc
-    }) + (len >> 1))
-        / len;
-    let avg = T::from(avg).expect("value should fit in Pixel");
+    let avg = (edges.fold(0u32, |acc, &v| acc + u32::from(v.into())) + (len >> 1)) / len;
+    let avg = u16::try_from(avg).expect("value should fit in u16");
+    let avg = T::try_from(avg).expect("value should fit in Pixel");
 
     for line in output.rows_iter_mut().take(height) {
         line[..width].fill(avg);
@@ -57,7 +54,7 @@ fn pred_dc_128<T: Pixel>(
     height: usize,
     bit_depth: usize,
 ) {
-    let v = T::from(128u32 << (bit_depth - 8)).expect("value should fit in Pixel");
+    let v = T::try_from(128u16 << (bit_depth - 8)).expect("value should fit in Pixel");
     for line in output.rows_iter_mut().take(height) {
         line[..width].fill(v);
     }
@@ -71,12 +68,12 @@ fn pred_dc_left<T: Pixel>(
     height: usize,
     _bit_depth: usize,
 ) {
-    let sum = left[..].iter().fold(0u32, |acc, &v| {
-        let v: u32 = v.to_u32().expect("value should fit in u32");
-        v + acc
-    });
-    let avg =
-        T::from((sum + (height >> 1) as u32) / height as u32).expect("value should fit in Pixel");
+    let sum = left[..]
+        .iter()
+        .fold(0u32, |acc, &v| acc + u32::from(v.into()));
+    let avg = (sum + (height >> 1) as u32) / height as u32;
+    let avg = u16::try_from(avg).expect("value should fit in u16");
+    let avg = T::try_from(avg).expect("value should fit in Pixel");
     for line in output.rows_iter_mut().take(height) {
         line[..width].fill(avg);
     }
@@ -90,12 +87,12 @@ fn pred_dc_top<T: Pixel>(
     height: usize,
     _bit_depth: usize,
 ) {
-    let sum = above[..width].iter().fold(0u32, |acc, &v| {
-        let v: u32 = v.to_u32().expect("value should fit in u32");
-        v + acc
-    });
-    let avg =
-        T::from((sum + (width >> 1) as u32) / width as u32).expect("value should fit in Pixel");
+    let sum = above[..width]
+        .iter()
+        .fold(0u32, |acc, &v| acc + u32::from(v.into()));
+    let avg = (sum + (width >> 1) as u32) / width as u32;
+    let avg = u16::try_from(avg).expect("value should fit in u16");
+    let avg = T::try_from(avg).expect("value should fit in Pixel");
     for line in output.rows_iter_mut().take(height) {
         line[..width].fill(avg);
     }

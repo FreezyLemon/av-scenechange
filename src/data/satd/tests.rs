@@ -41,7 +41,7 @@ fn setup_planes<T: Pixel>() -> (Plane<T>, Plane<T>) {
         for (j, pixel) in row.iter_mut().enumerate() {
             let val = ((j + i) as i32 - xpad_off) & 255i32;
             assert!(val >= u8::MIN.into() && val <= u8::MAX.into());
-            *pixel = T::from(val).expect("value should fit in Pixel");
+            *pixel = T::from(val as u8);
         }
     }
 
@@ -53,7 +53,7 @@ fn setup_planes<T: Pixel>() -> (Plane<T>, Plane<T>) {
         for (j, pixel) in row.iter_mut().enumerate() {
             let val = (j as i32 - i as i32 - xpad_off) & 255i32;
             assert!(val >= u8::MIN.into() && val <= u8::MAX.into());
-            *pixel = T::from(val).expect("value should fit in Pixel");
+            *pixel = T::from(val as u8);
         }
     }
 

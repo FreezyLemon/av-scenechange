@@ -12,8 +12,8 @@ pub(super) fn sad_plane_internal<T: Pixel>(src: &Plane<T>, dst: &Plane<T>) -> u6
             src.iter()
                 .zip(dst.iter())
                 .map(|(&p1, &p2)| {
-                    let p1 = p1.to_i32().expect("value should fit in i32");
-                    let p2 = p2.to_i32().expect("value should fit in i32");
+                    let p1 = i32::from(p1.into());
+                    let p2 = i32::from(p2.into());
                     p1.abs_diff(p2)
                 })
                 .sum::<u32>() as u64
@@ -49,8 +49,8 @@ pub(super) fn get_sad_internal<T: Pixel>(
             src.iter()
                 .zip(dst)
                 .map(|(&p1, &p2)| {
-                    let p1 = p1.to_i32().expect("value should fit in i32");
-                    let p2 = p2.to_i32().expect("value should fit in i32");
+                    let p1 = i32::from(p1.into());
+                    let p2 = i32::from(p2.into());
                     p1.abs_diff(p2)
                 })
                 .sum::<u32>()
